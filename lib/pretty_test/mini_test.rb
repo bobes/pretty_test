@@ -71,13 +71,13 @@ class MiniTest::Unit
     report = case error
     when MiniTest::Skip then
       @skips += 1
-      "\e[30m\e[43m[SKIPPED] #{pretty_test_name(klass, method)}\e[0m\n#{pretty_location(error)}\n\e[31m#{error.message}\e[0m"
+      "\e[30m\e[43m[SKIPPED] #{pretty_test_name(klass, method)}\e[0m\n#{pretty_skipped_location(error)}\n\e[31m#{error.message}\e[0m"
     when MiniTest::Assertion then
       @failures += 1
-      "\e[37m\e[41m\e[1m[FAILURE] #{pretty_test_name(klass, method)}\e[0m\n#{pretty_location(error)}\n#{error.message}"
+      "\e[37m\e[41m\e[1m[FAILURE] #{pretty_test_name(klass, method)}\e[0m\n#{pretty_failure_location(error)}\n#{error.message}"
     else
       @errors += 1
-      "\e[37m\e[41m\e[1m[ERROR] #{pretty_test_name(klass, method)}\e[0m\n#{pretty_trace(error)}"
+      "\e[37m\e[41m\e[1m[ERROR] #{pretty_test_name(klass, method)}\e[0m\n#{pretty_error_trace(error)}"
     end
     @@out.puts "#{report}\n\n"
   end
@@ -90,14 +90,23 @@ class MiniTest::Unit
     "#{suite_name}: #{test_name}"
   end
 
-  def pretty_location(error)
+  def pretty_skipped_location(error)
     location = error.backtrace.detect do |line|
       line =~ %r{^#{Dir.pwd}/}
     end
     clean_trace_line("\e[1m-> ", location)
   end
 
-  def pretty_trace(error)
+  def pretty_failure_location(error)
+    location = nil
+    error.backtrace.reverse.each do |line|
+      break if line =~ /in .(assert|refute)_/
+      location = line if line =~ %r{^#{Dir.pwd}/}
+    end
+    clean_trace_line("\e[1m-> ", location)
+  end
+
+  def pretty_error_trace(error)
     location = error.backtrace.detect do |line|
       line =~ %r{^#{Dir.pwd}/}
     end
