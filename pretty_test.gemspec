@@ -14,4 +14,7 @@ Gem::Specification.new do |gem|
   gem.name          = "pretty_test"
   gem.require_paths = ["lib"]
   gem.version       = PrettyTest::VERSION
+
+  gem.add_dependency "minitest", ">= 2.6"
+  gem.add_dependency "minitap", ">= 0.3"
 end
