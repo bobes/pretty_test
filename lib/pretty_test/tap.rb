@@ -59,6 +59,7 @@ module PrettyTest
     def tapout_after_suites(suites, type)
       update_status
       puts "\n\nSuite seed: #{options[:seed]}\n\n"
+      puts "\e[32m ---- PASSED! -----\e[37m" if errors == 0 && failures == 0
     end
 
     protected
