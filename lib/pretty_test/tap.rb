@@ -4,9 +4,9 @@ module PrettyTest
   class Tap < ::MiniTest::MiniTap
 
     SKIP_FORMAT = "\e[33m[SKIPPED] %s: %s\e[0m\n%s\n%s"
-    FAILURE_FORMAT = "\e[31m\e[1m[FAILURE] %s: %s\e[0m\n%s\n%s"
-    ERROR_FORMAT = "\e[31m\e[1m[ERROR] %s: %s\e[0m\n\e[31m%s: %s\e[0m\n%s"
-    STATUS_FORMAT = "\e[2K\r\e[?7l\e[1m\e[37m(%.1fs) \e[32m%d/%d tests\e[37m, \e[36m%d assertions\e[37m, \e[31m%d errors\e[37m, \e[31m%d failures\e[37m, \e[33m%d skips \e[37m%s\e[?7h\e[0m"
+    FAILURE_FORMAT = "\e[31m[FAILURE] %s: %s\e[0m\n%s\n%s"
+    ERROR_FORMAT = "\e[31m[ERROR] %s: %s\e[0m\n\e[31m%s: %s\e[0m\n%s"
+    STATUS_FORMAT = "\e[2K\r\e[?7l\e[37m(%.1fs) \e[32m%d/%d tests\e[37m, \e[36m%d assertions\e[37m, \e[31m%d errors\e[37m, \e[31m%d failures\e[37m, \e[33m%d skips \e[37m%s\e[?7h\e[0m"
 
     attr_accessor :started_at, :progress, :suite_name, :test_name
 
