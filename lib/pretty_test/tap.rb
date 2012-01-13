@@ -40,14 +40,20 @@ module PrettyTest
     end
 
     def tapout_failure(suite, test, test_runner)
-      tapout_error(suite, test, test_runner, FAILURE_FORMAT)
-    end
-
-    def tapout_error(suite, test, test_runner, format = ERROR_FORMAT)
       @progress += 1
       error = test_runner.exception
       test_name = pretty_test_name(test)
-      trace = pretty_trace(error)
+      index = find_assertion_index(error)
+      trace = pretty_trace(error, index)
+      print_error FAILURE_FORMAT, suite_name, test_name, error.class, error.message, trace
+    end
+
+    def tapout_error(suite, test, test_runner)
+      @progress += 1
+      error = test_runner.exception
+      test_name = pretty_test_name(test)
+      index = find_exception_index(error)
+      trace = pretty_trace(error, index)
       print_error ERROR_FORMAT, suite_name, test_name, error.class, error.message, trace
     end
 
@@ -92,15 +98,18 @@ module PrettyTest
       clean_trace_line("\e[1m-> ", path, line)
     end
 
-    def pretty_trace(e)
-      assertion_index = e.backtrace.rindex { |trace| trace =~ /:in .(assert|refute|flunk|pass|fail|raise|must|wont)/ }
-      location_index = if assertion_index
-        assertion_index + 1
-      else
-        e.backtrace.index { |trace_line| trace_line.index(Dir.pwd) }
-      end
+    def find_assertion_index(error)
+      index = error.backtrace.index { |trace| trace =~ /:in .(assert|refute|flunk|pass|fail|raise|must|wont)/ }
+      index ? index + 1 : find_exception_index(error)
+    end
+
+    def find_exception_index(error)
+      error.backtrace.index { |trace| trace.index(Dir.pwd) }
+    end
+
+    def pretty_trace(error, location_index)
       lines = []
-      e.backtrace.each_with_index do |trace, index|
+      error.backtrace.each_with_index do |trace, index|
         prefix = index == location_index ? "\e[1m-> " : "   "
         trace_file, trace_line = trace.sub(/:in .*$/, "").split(":")
         lines << clean_trace_line(prefix, trace_file, trace_line)
