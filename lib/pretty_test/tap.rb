@@ -4,7 +4,7 @@ module PrettyTest
   class Tap < ::MiniTest::MiniTap
 
     SKIP_FORMAT = "\e[33m[SKIPPED] %s: %s\e[0m\n%s\n%s"
-    FAILURE_FORMAT = "\e[31m[FAILURE] %s: %s\e[0m\n%s\n%s"
+    FAILURE_FORMAT = "\e[31m[FAILURE] %s: %s\e[0m\n\e[31m%s: %s\e[0m\n%s"
     ERROR_FORMAT = "\e[31m[ERROR] %s: %s\e[0m\n\e[31m%s: %s\e[0m\n%s"
     STATUS_FORMAT = "\e[2K\r\e[?7l\e[37m(%.1fs) \e[32m%d/%d tests\e[37m, \e[36m%d assertions\e[37m, \e[31m%d errors\e[37m, \e[31m%d failures\e[37m, \e[33m%d skips \e[37m%s\e[?7h\e[0m"
 
@@ -40,15 +40,10 @@ module PrettyTest
     end
 
     def tapout_failure(suite, test, test_runner)
-      @progress += 1
-      error = test_runner.exception
-      test_name = pretty_test_name(test)
-      location = pretty_location(error)
-      message = error.message.strip
-      print_error FAILURE_FORMAT, suite_name, test_name, message, location
+      tapout_error(suite, test, test_runner, FAILURE_FORMAT)
     end
 
-    def tapout_error(suite, test, test_runner)
+    def tapout_error(suite, test, test_runner, format = ERROR_FORMAT)
       @progress += 1
       error = test_runner.exception
       test_name = pretty_test_name(test)
@@ -64,6 +59,12 @@ module PrettyTest
       else
         puts "\e[31m----- FAILED! -----\e[0m"
       end
+    end
+
+    def tapout_(suite, test, test_runner)
+      remove_status
+      puts "\n\e[31mCould not run #{suite}##{test} for an unknown reason\e[0m\n"
+      puts
     end
 
     protected
@@ -92,12 +93,19 @@ module PrettyTest
     end
 
     def pretty_trace(e)
-      path, line = location(e)
-      e.backtrace.map { |trace_line|
-        prefix = trace_line.index("#{path}:#{line}") ? "\e[1m-> " : "   "
-        file, line = trace_line.sub(/:in .*$/, "").split(":")
-        clean_trace_line(prefix, file, line)
-      }.compact.join("\n")
+      assertion_index = e.backtrace.rindex { |trace| trace =~ /:in .(assert|refute|flunk|pass|fail|raise|must|wont)/ }
+      location_index = if assertion_index
+        assertion_index + 1
+      else
+        e.backtrace.index { |trace_line| trace_line.index(Dir.pwd) }
+      end
+      lines = []
+      e.backtrace.each_with_index do |trace, index|
+        prefix = index == location_index ? "\e[1m-> " : "   "
+        trace_file, trace_line = trace.sub(/:in .*$/, "").split(":")
+        lines << clean_trace_line(prefix, trace_file, trace_line)
+      end
+      lines.compact.join("\n")
     end
 
     def clean_trace_line(prefix, path, line)
