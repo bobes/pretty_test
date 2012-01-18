@@ -111,18 +111,18 @@ module PrettyTest
       lines = []
       error.backtrace.each_with_index do |trace, index|
         prefix = index == location_index ? "\e[1m-> " : "   "
-        trace_file, trace_line = trace.sub(/:in .*$/, "").split(":")
-        lines << clean_trace_line(prefix, trace_file, trace_line)
+        trace_file, trace_line, trace_method = trace.split(":", 3)
+        lines << clean_trace_line(prefix, trace_file, trace_line, trace_method)
       end
       lines.compact.join("\n")
     end
 
-    def clean_trace_line(prefix, path, line)
+    def clean_trace_line(prefix, path, line, method)
       case path
-      when %r{^#{Dir.pwd}/(.+?)/(.+)$} then "\e[37m#{prefix}[#{$1}] #{$2}:#{line}\e[0m"
+      when %r{^#{Dir.pwd}/([^/]+)/(.+)$} then "\e[37m#{prefix}[#{$1}] #{$2}:#{line} #{method}\e[0m"
+      when %r{^.*/(ruby-[^/]+)/(bin/.+)$} then "\e[35m#{prefix}[#{$1}] #{$2}:#{line} #{method}\e[0m"
       when %r{^.*/gems/(minitap|minitest)-.+/(.+)$} then nil
-      when %r{^.*/gems/(.+?)/(.+)$} then "\e[36m#{prefix}[#{$1}] #{$2}:#{line}\e[0m"
-      when %r{^.*/rubies/(.+?)/(.+)$} then "\e[35m#{prefix}[#{$1}] #{$2}:#{line}\e[0m"
+      when %r{^.*/gems/([^/]+)/(.+)$} then "\e[36m#{prefix}[#{$1}] #{$2}:#{line} #{method}\e[0m"
       else "#{prefix}#{path}:#{line}"
       end
     end
