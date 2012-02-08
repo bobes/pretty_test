@@ -1,6 +1,4 @@
 # -*- encoding: utf-8 -*-
-require File.expand_path("../lib/pretty_test/version", __FILE__)
-
 Gem::Specification.new do |gem|
   gem.authors       = ["Vladimir Bobes Tuzinsky"]
   gem.email         = ["vladimir@tuzinsky.com"]
@@ -13,7 +11,7 @@ Gem::Specification.new do |gem|
   gem.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
   gem.name          = "pretty_test"
   gem.require_paths = ["lib"]
-  gem.version       = PrettyTest::VERSION
+  gem.version       = "0.0.9"
 
   gem.add_dependency "minitest", ">= 2.6"
   gem.add_dependency "minitap", ">= 0.3"
