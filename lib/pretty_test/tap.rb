@@ -117,7 +117,7 @@ module PrettyTest
       lines.compact.join("\n")
     end
 
-    def clean_trace_line(prefix, path, line, method)
+    def clean_trace_line(prefix, path, line, method = nil)
       case path
       when %r{^#{Dir.pwd}/([^/]+)/(.+)$} then "\e[37m#{prefix}[#{$1}] #{$2}:#{line} #{method}\e[0m"
       when %r{^.*/(ruby-[^/]+)/(bin/.+)$} then "\e[35m#{prefix}[#{$1}] #{$2}:#{line} #{method}\e[0m"
