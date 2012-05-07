@@ -123,7 +123,7 @@ module PrettyTest
       when %r{^.*/(ruby-[^/]+)/(bin/.+)$} then "\e[35m#{prefix}[#{$1}] #{$2}:#{line} #{method}\e[0m"
       when %r{^.*/gems/(minitap|minitest)-.+/(.+)$} then nil
       when %r{^.*/gems/([^/]+)/(.+)$} then "\e[36m#{prefix}[#{$1}] #{$2}:#{line} #{method}\e[0m"
-      else "#{prefix}#{path}:#{line}"
+      else "#{prefix}#{path}:#{line}\e[0m"
       end
     end
 
