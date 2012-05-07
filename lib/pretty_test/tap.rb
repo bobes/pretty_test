@@ -99,7 +99,7 @@ module PrettyTest
     end
 
     def find_assertion_index(error)
-      index = error.backtrace.index { |trace| trace =~ /:in .(assert|refute|flunk|pass|fail|raise|must|wont)/ }
+      index = error.backtrace.rindex { |trace| trace =~ /:in .(assert|refute|flunk|pass|fail|raise|must|wont)/ }
       index ? index + 1 : find_exception_index(error)
     end
 
