@@ -1,0 +1,94 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Pretty Test by bobes</title>
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="javascripts/respond.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <!--[if lt IE 8]>
+    <link rel="stylesheet" href="stylesheets/ie.css">
+    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+  </head>
+  <body>
+      <div id="header">
+        <nav>
+          <li class="fork"><a href="https://github.com/bobes/pretty_test">View On GitHub</a></li>
+          <li class="downloads"><a href="https://github.com/bobes/pretty_test/zipball/master">ZIP</a></li>
+          <li class="downloads"><a href="https://github.com/bobes/pretty_test/tarball/master">TAR</a></li>
+          <li class="title">DOWNLOADS</li>
+        </nav>
+      </div><!-- end header -->
+
+    <div class="wrapper">
+
+      <section>
+        <div id="title">
+          <h1>Pretty Test</h1>
+          <p>Beautiful output for minitest</p>
+          <hr>
+          <span class="credits left">Project maintained by <a href="https://github.com/bobes">bobes</a></span>
+          <span class="credits right">Hosted on GitHub Pages &mdash; Theme by <a href="http://twitter.com/#!/michigangraham">mattgraham</a></span>
+        </div>
+
+        <h1>Pretty Test</h1>
+
+<p><code>pretty_test</code> is a Ruby gem that will make output from your
+<a href="http://www.ruby-doc.org/stdlib-1.9.3/libdoc/minitest/unit/rdoc/index.html">minitest</a>
+tests pretty and useful.</p>
+
+<h2>The problem</h2>
+
+<p>There are only two things I want to see <em>while</em> running a suite of tests: progress and failed tests.</p>
+
+<p><a href="http://www.ruby-doc.org/stdlib-1.9.3/libdoc/minitest/unit/rdoc/index.html">minitest</a>
+prints dots for passed tests and Fs for failed tests - not very useful. If you want to know <em>which</em> tests failed and <em>why</em>, you have to wait until the whole suite is finished. This kind of feedback is painfully slow.</p>
+
+<p><a href="https://github.com/TwP/turn">Turn</a> with the default settings brings a huge improvement by printing failed test details immediately. But it also prints one line for every passed test. So you'll often get just a glimpse of a failed test stack trace immediately replaced by a fast-scrolling list of passed tests. <em>(I know there are other output formats in turn but I haven't found any of them very useful.)</em></p>
+
+<h2>The solution</h2>
+
+<p>With <code>pretty_test</code> you'll get</p>
+
+<ul>
+<li>number of passed and failed tests, number of passed assertions,</li>
+<li>name of currently running test,</li>
+<li>error information and a colorised stack trace for every failed test,</li>
+<li>highlighted line of code that most likely caused the failure.</li>
+</ul><p>And all of this in real time.</p>
+
+<h2>Install</h2>
+
+<p>All you need to do is to add <code>pretty_test</code> to your Gemfile:</p>
+
+<pre><code>group :test do
+  gem "pretty_test"
+  # ...
+end
+</code></pre>
+
+<p>and enjoy pretty and useful test output.</p>
+      </section>
+
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><!--<![endif]-->
+              <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-1584061-7");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+  </body>
+</html>
