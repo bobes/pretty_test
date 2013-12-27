@@ -1,46 +1,81 @@
-require "minitap"
 module PrettyTest
 
-  class Tap < ::MiniTest::MiniTap
+  class Runner < ::MiniTest::Unit
 
     SKIP_FORMAT = "\e[33m[SKIPPED] %s: %s\e[0m\n%s\n%s"
     FAILURE_FORMAT = "\e[31m[FAILURE] %s: %s\e[0m\n\e[31m%s: %s\e[0m\n%s"
     ERROR_FORMAT = "\e[31m[ERROR] %s: %s\e[0m\n\e[31m%s: %s\e[0m\n%s"
     STATUS_FORMAT = "\e[2K\r\e[?7l\e[37m(%.1fs) \e[32m%d/%d tests\e[37m, \e[36m%d assertions\e[37m, \e[31m%d errors\e[37m, \e[31m%d failures\e[37m, \e[33m%d skips \e[37m%s\e[?7h\e[0m"
 
-    attr_accessor :started_at, :progress, :suite_name, :test_name
+    attr_accessor :started_at, :test_count, :assertion_count, :progress, :suite_name, :test_name
 
-    def tapout_before_suites(suites, type)
-      @started_at = Time.now
-      @progress = 0
+    def _run_anything(type)
+      suites = TestCase.send("#{type}_suites")
+      _run_suites(suites, type)
     end
 
-    def tapout_before_suite(suite)
+    def _run_suites(suites, type)
+      before_suites(suites, type)
+      super
+    ensure
+      after_suites(suites, type)
+    end
+
+    def _run_suite(suite, type)
+      before_suite(suite)
+      tests = suite.send("#{type}_methods")
+      tests.each do |test|
+        run_test(suite, test)
+      end
+    ensure
+      after_suite(suite, type)
+    end
+
+    private
+
+    def before_suites(suites, type)
+      @started_at = Time.now
+      @test_count = suites.map { |suite| suite.send("#{type}_methods").count }.sum
+      @progress = 0
+      @assertion_count = 0
+    end
+
+    def before_suite(suite)
       @suite_name = pretty_suite_name(suite.name)
     end
 
-    def tapout_before_test(suite, test)
+    def run_test(suite, test)
+      before_test(test)
+      instance = suite.new(test)
+      instance._assertions = 0
+      instance.run(self)
+      @assertion_count += instance._assertions
+    ensure
+      after_test
+    end
+
+    def before_test(test)
       @test_name = pretty_test_name(test)
       remove_status
       update_status("#{suite_name}: #{test_name}")
     end
 
-    def tapout_pass(suite, test, test_runner)
+    def after_test
       @progress += 1
       update_status("")
     end
 
-    def tapout_skip(suite, test, test_runner)
-      @progress += 1
-      error = test_runner.exception
+    def pass
+    end
+
+    def skip(exception)
       test_name = pretty_test_name(test)
-      location = pretty_location(error)
-      message = error.message.strip
+      location = pretty_location(exception)
+      message = exception.message.strip
       print_error SKIP_FORMAT, suite_name, test_name, message, location
     end
 
-    def tapout_failure(suite, test, test_runner)
-      @progress += 1
+    def failure(exception)
       error = test_runner.exception
       test_name = pretty_test_name(test)
       index = find_assertion_index(error)
@@ -48,8 +83,7 @@ module PrettyTest
       print_error FAILURE_FORMAT, suite_name, test_name, error.class, error.message, trace
     end
 
-    def tapout_error(suite, test, test_runner)
-      @progress += 1
+    def error(suite, test, test_runner)
       error = test_runner.exception
       test_name = pretty_test_name(test)
       index = find_exception_index(error)
@@ -57,23 +91,17 @@ module PrettyTest
       print_error ERROR_FORMAT, suite_name, test_name, error.class, error.message, trace
     end
 
-    def tapout_after_suites(suites, type)
+    def after_suite(suite, type)
+    end
+
+    def after_suites(suites, type)
       update_status
-      puts "\n\nSuite seed: #{options[:seed]}\n\n"
       if errors + failures == 0
         puts "\e[32m----- PASSED! -----\e[0m"
       else
         puts "\e[31m----- FAILED! -----\e[0m"
       end
     end
-
-    def tapout_(suite, test, test_runner)
-      remove_status
-      puts "\n\e[31mCould not run #{suite}##{test} for an unknown reason\e[0m\n"
-      puts
-    end
-
-    protected
 
     def pretty_suite_name(suite)
       suite = suite.dup
@@ -134,7 +162,8 @@ module PrettyTest
     end
 
     def update_status(message = "")
-      print STATUS_FORMAT % [Time.now - started_at, progress, test_count, assertion_count, errors, failures, skips, message]
+      running_time = Time.now - started_at
+      print STATUS_FORMAT % [running_time, progress, test_count, assertion_count, errors, failures, skips, message]
     end
 
     def remove_status
