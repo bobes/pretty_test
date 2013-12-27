@@ -1,3 +1,5 @@
+require "minitest/unit"
+
 module PrettyTest
 
   class Runner < ::MiniTest::Unit
@@ -5,9 +7,9 @@ module PrettyTest
     SKIP_FORMAT = "\e[33m[SKIPPED] %s: %s\e[0m\n%s\n%s"
     FAILURE_FORMAT = "\e[31m[FAILURE] %s: %s\e[0m\n\e[31m%s: %s\e[0m\n%s"
     ERROR_FORMAT = "\e[31m[ERROR] %s: %s\e[0m\n\e[31m%s: %s\e[0m\n%s"
-    STATUS_FORMAT = "\e[2K\r\e[?7l\e[37m(%.1fs) \e[32m%d/%d tests\e[37m, \e[36m%d assertions\e[37m, \e[31m%d errors\e[37m, \e[31m%d failures\e[37m, \e[33m%d skips \e[37m%s\e[?7h\e[0m"
+    STATUS_FORMAT = "\e[2K\r\e[?7l\e[37m(%.1fs) \e[32m%d/%d tests (%d%%)\e[37m, \e[36m%d assertions\e[37m, \e[31m%d errors\e[37m, \e[31m%d failures\e[37m, \e[33m%d skips \e[37m%s\e[?7h\e[0m"
 
-    attr_accessor :started_at, :test_count, :assertion_count, :progress, :suite_name, :test_name
+    attr_accessor :started_at, :test_count, :assertion_count, :completed, :suite_name, :test_name, :test_record
 
     def _run_anything(type)
       suites = TestCase.send("#{type}_suites")
@@ -31,12 +33,16 @@ module PrettyTest
       after_suite(suite, type)
     end
 
+    def record(suite, test, assertions, time, exception)
+      @test_record = TestRecord.new(suite, test, assertions, time, exception)
+    end
+
     private
 
     def before_suites(suites, type)
       @started_at = Time.now
       @test_count = suites.map { |suite| suite.send("#{type}_methods").count }.sum
-      @progress = 0
+      @completed = 0
       @assertion_count = 0
     end
 
@@ -61,7 +67,13 @@ module PrettyTest
     end
 
     def after_test
-      @progress += 1
+      @completed += 1
+      case exception = test_record.exception
+      when nil then pass
+      when ::MiniTest::Skip then skip(exception)
+      when ::MiniTest::Assertion then failure(exception)
+      else error(exception)
+      end
       update_status("")
     end
 
@@ -69,26 +81,21 @@ module PrettyTest
     end
 
     def skip(exception)
-      test_name = pretty_test_name(test)
       location = pretty_location(exception)
       message = exception.message.strip
       print_error SKIP_FORMAT, suite_name, test_name, message, location
     end
 
     def failure(exception)
-      error = test_runner.exception
-      test_name = pretty_test_name(test)
-      index = find_assertion_index(error)
-      trace = pretty_trace(error, index)
-      print_error FAILURE_FORMAT, suite_name, test_name, error.class, error.message, trace
+      index = find_assertion_index(exception)
+      trace = pretty_trace(exception, index)
+      print_error FAILURE_FORMAT, suite_name, test_name, exception.class, exception.message, trace
     end
 
-    def error(suite, test, test_runner)
-      error = test_runner.exception
-      test_name = pretty_test_name(test)
-      index = find_exception_index(error)
-      trace = pretty_trace(error, index)
-      print_error ERROR_FORMAT, suite_name, test_name, error.class, error.message, trace
+    def error(exception)
+      index = find_exception_index(exception)
+      trace = pretty_trace(exception, index)
+      print_error ERROR_FORMAT, suite_name, test_name, exception.class, exception.message, trace
     end
 
     def after_suite(suite, type)
@@ -97,9 +104,9 @@ module PrettyTest
     def after_suites(suites, type)
       update_status
       if errors + failures == 0
-        puts "\e[32m----- PASSED! -----\e[0m"
+        puts "  \e[32m----- PASSED! -----\e[0m"
       else
-        puts "\e[31m----- FAILED! -----\e[0m"
+        puts "  \e[31m----- FAILED! -----\e[0m"
       end
     end
 
@@ -163,11 +170,15 @@ module PrettyTest
 
     def update_status(message = "")
       running_time = Time.now - started_at
-      print STATUS_FORMAT % [running_time, progress, test_count, assertion_count, errors, failures, skips, message]
+      progress = 100.0 * completed / test_count
+      print STATUS_FORMAT % [running_time, completed, test_count, progress, assertion_count, errors, failures, skips, message]
     end
 
     def remove_status
       print "\e[2K\r"
+    end
+
+    class TestRecord < Struct.new(:suite, :test, :assertions, :time, :exception)
     end
   end
 end
