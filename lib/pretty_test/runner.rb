@@ -102,7 +102,9 @@ module PrettyTest
     end
 
     def after_suites(suites, type)
-      update_status
+      if test_count > 0
+        update_status
+      end
       if errors + failures == 0
         puts "  \e[32m----- PASSED! -----\e[0m"
       else
