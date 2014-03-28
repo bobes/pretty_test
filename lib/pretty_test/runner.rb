@@ -47,7 +47,7 @@ module PrettyTest
     end
 
     def before_suite(suite)
-      @suite_name = pretty_suite_name(suite.name)
+      @suite_name = pretty_suite_name(suite.name || suite.to_s)
     end
 
     def run_test(suite, test)
