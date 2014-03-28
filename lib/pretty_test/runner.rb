@@ -24,13 +24,13 @@ module PrettyTest
     end
 
     def _run_suite(suite, type)
-      before_suite(suite)
       tests = suite.send("#{type}_methods")
-      tests.each do |test|
-        run_test(suite, test)
+      if tests.any?
+        before_suite(suite)
+        tests.each do |test|
+          run_test(suite, test)
+        end
       end
-    ensure
-      after_suite(suite, type)
     end
 
     def record(suite, test, assertions, time, exception)
@@ -96,9 +96,6 @@ module PrettyTest
       index = find_exception_index(exception)
       trace = pretty_trace(exception, index)
       print_error ERROR_FORMAT, suite_name, test_name, exception.class, exception.message, trace
-    end
-
-    def after_suite(suite, type)
     end
 
     def after_suites(suites, type)
