@@ -68,7 +68,7 @@ module PrettyTest
 
     def after_test
       @completed += 1
-      case exception = test_record.exception
+      case exception = test_record && test_record.exception
       when nil then pass
       when ::MiniTest::Skip then skip(exception)
       when ::MiniTest::Assertion then failure(exception)
