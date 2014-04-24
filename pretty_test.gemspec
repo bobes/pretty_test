@@ -11,7 +11,7 @@ Gem::Specification.new do |gem|
   gem.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
   gem.name          = "pretty_test"
   gem.require_paths = ["lib"]
-  gem.version       = "1.0.0"
+  gem.version       = "1.0.1"
 
   gem.add_dependency "minitest", "~> 5"
 end

@@ -65,9 +65,9 @@ module Minitest
 
     def skip(test_name, exception)
       self.skips += 1
-      location = pretty_location(exception)
-      message = exception.message.strip
-      print_error SKIP_FORMAT, test_name, message, location
+      index = find_assertion_index(exception)
+      trace = pretty_trace(exception, index)
+      print_error SKIP_FORMAT, test_name, exception.message, trace
     end
 
     def failure(test_name, exception)
@@ -82,11 +82,6 @@ module Minitest
       index = find_exception_index(exception)
       trace = pretty_trace(exception, index)
       print_error ERROR_FORMAT, test_name, exception.class, exception.message, trace
-    end
-
-    def pretty_location(e)
-      path, line = location(e)
-      clean_trace_line("\e[1m-> ", path, line)
     end
 
     def find_assertion_index(error)
