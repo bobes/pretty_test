@@ -100,10 +100,13 @@ module Minitest
 
     def pretty_trace(error, location_index)
       lines = []
-      error.backtrace.each_with_index do |trace, index|
+      backtrace = error.backtrace
+      entry_point = backtrace.reverse.detect { |trace| trace.starts_with?(Dir.pwd) }
+      backtrace.each_with_index do |trace, index|
         prefix = index == location_index ? "\e[1m-> " : "   "
         trace_file, trace_line, trace_method = trace.split(":", 3)
         lines << clean_trace_line(prefix, trace_file, trace_line, trace_method)
+        break if trace == entry_point
       end
       lines.compact.join("\n")
     end
