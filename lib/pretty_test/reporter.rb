@@ -52,9 +52,9 @@ module PrettyTest
         update_status
       end
       if errors + failures == 0
-        io.puts "  \e[32m----- PASSED! -----\e[0m"
+        io.puts "\n\n\e[32m----- PASSED! -----\e[0m\n\n"
       else
-        io.puts "  \e[31m----- FAILED! -----\e[0m"
+        io.puts "\n\n\e[31m----- FAILED! -----\e[0m\n\n"
       end
     end
 
