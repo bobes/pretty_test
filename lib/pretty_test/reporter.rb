@@ -1,18 +1,20 @@
 require "minitest"
 
-module Minitest
+module PrettyTest
 
-  class ProgressReporter
+  class Reporter < ::Minitest::AbstractReporter
 
     SKIP_FORMAT = "\e[33m[SKIPPED] %s\e[0m\n%s\n%s"
     FAILURE_FORMAT = "\e[31m[FAILURE] %s\e[0m\n\e[31m%s: %s\e[0m\n%s"
     ERROR_FORMAT = "\e[31m[ERROR] %s\e[0m\n\e[31m%s: %s\e[0m\n%s"
     STATUS_FORMAT = "\e[2K\r\e[?7l\e[37m(%.1fs) \e[32m%d/%d tests (%d%%)\e[37m, \e[36m%d assertions\e[37m, \e[31m%d errors\e[37m, \e[31m%d failures\e[37m, \e[33m%d skips\e[?7h\e[0m"
 
-    attr_accessor :started_at, :tests, :assertions, :completed, :failures, :errors, :skips
+    attr_accessor :io, :started_at, :tests, :assertions, :completed, :failures, :errors, :skips
 
-    def initialize(io = $stdout, options = {})
-      super
+    def initialize(options = {})
+      super()
+
+      self.io = options[:io] || $stdout
 
       self.started_at = nil
       self.completed = 0
@@ -130,11 +132,6 @@ module Minitest
 
     def remove_status
       io.print "\e[2K\r"
-    end
-  end
-
-  class SummaryReporter
-    def report
     end
   end
 end
